@@ -1,29 +1,48 @@
-# Root Methods Comparison
+# Android Root Methods Comparison
 
-| Method | Requires Flashing | Hides from Apps | GMS/Banking | Battery | Complexity | Best For |
-|--------|-------------------|-----------------|------------|---------|------------|----------|
-| **Magisk** | Boot.img | Via Shamiko | Good | Good | Medium | Daily driver, modules |
-| **KernelSU** | Custom kernel | Inherent | Better | Good | High | Kernel-level hiding |
-| **Superuser (old)** | System patch | Poor | Poor | N/A | Low | Legacy, simple |
-| **Shizuku** | USB only | N/A (not root) | Excellent | Excellent | Low | No-root power user |
+| Method | Root Type | Apps Affected | Detection Resistance | Ease | OTA Survival | Notes |
+|--------|-----------|---------------|----------------------|------|-------------|-------|
+| **Magisk** | Systemless | Minimal (DenyList) | Moderate (Shamiko+Zygisk) | Easy | Yes | Most popular, great module system |
+| **KernelSU** | Kernel-level | Fewer (kernel grants) | High (kernel-native) | Medium | Native | Modern alternative, fewer userspace artifacts |
+| **SuperSU** | Traditional | All | Low | Easy | No | Legacy, discontinued but still works |
+| **Phh's SuperUser** | Traditional | All | Low | Easy | No | Old, unmaintained |
+| **su binary** | Manual | All | Very Low | Hard | No | Raw root — not for daily use |
+| **Rooted ROM** (LineageOS) | Integrated | Configurable | Depends | Easy | Yes | Root baked into ROM, no modules |
 
-## Decision tree
+## Decision Tree
 
 ```
-Do you want root?
-├─ NO → Use Shizuku (USB ADB access, no root needed)
-├─ YES → Can you flash custom ROM?
-│   ├─ NO → Not possible on locked devices
-│   └─ YES → Pick: Magisk (modules) or KernelSU (kernel-level)
-└─ Legacy device → Superuser (if available for your kernel)
+Do you need root?
+├─ YES, daily driver
+│  ├─ Want modules/tweaks? → Magisk
+│  ├─ Maximum evasion? → KernelSU + ZygiskNext
+│  └─ Custom ROM anyway? → LineageOS with built-in root
+├─ YES, one-time task
+│  └─ Use Shizuku (adb shell, no root needed!)
+└─ NO → Stay unrooted for better security
 ```
 
-## When to use each
+## Root Detection Status (2026)
 
-**Magisk**: Best for most users. Works with Zygisk modules, has huge ecosystem, survives OTAs.
+| Check | Magisk + Shamiko | KernelSU + PlayIntegrityFix | Stock |
+|-------|------------------|------------------------------|-------|
+| Banking apps | ✅ Passes | ✅ Passes | ✅ Passes |
+| Play Integrity | ✅ With fix | ✅ With fix | ✅ Passes |
+| File checks | ✅ Blocked | ✅ Blocked | ❌ Detects |
+| Process checks | ✅ Blocked | ✅ Blocked | ❌ Detects |
+| Build props | ✅ Spoofed | ✅ Spoofed | ❌ Test-keys |
 
-**KernelSU**: If you need kernel-level root or want superior app detection evasion.
+## Installation paths
 
-**Shizuku**: No flashing needed, works immediately, can't run actual root commands but grants shell-like access.
+### Quickest: Magisk via boot.img patching
+1. Download Magisk APK
+2. Patch your ROM's boot.img in the app
+3. Flash patched image: `fastboot flash boot magisk_patched.img`
 
-**SuperUser**: Only if stuck on very old Android with kernel source available.
+### Most reliable: KernelSU (Android 12+ GKI devices only)
+1. Check device uses GKI kernel: `cat /proc/version | grep gki`
+2. Download KernelSU boot.img for your device
+3. Flash: `fastboot flash boot kernelsu-boot.img`
+
+### Least hassle: LineageOS + built-in sudo
+LineageOS includes optional root grant to trusted apps. No modules, just sudo-style elevation.
